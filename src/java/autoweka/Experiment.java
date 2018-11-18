@@ -10,10 +10,13 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.net.URLDecoder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import ca.ubc.cs.beta.smac.executors.SMACExecutor;
 
 @XmlRootElement(name="experiment")
 @XmlAccessorType(XmlAccessType.NONE)
@@ -194,6 +197,13 @@ public class Experiment extends XmlSerializable
      */
     public static void main(String[] args)
     {
+    	runMain(args);
+    }
+    
+    public static List<String> runMain(String[] args){
+    	
+    	List<String> resultList = new ArrayList<>();
+    	
         //Load an experiment and seed from the args
         File experiment = null;
         String seed = null;
@@ -229,31 +239,7 @@ public class Experiment extends XmlSerializable
                 exp.callString.set(i, exp.callString.get(i).replace("{SEED}", seed));
                 log.debug("{}", exp.callString.get(i));
             }
-
-
-            //See if we can get the path
-            File executable = autoweka.Util.findExecutableOnPath(exp.callString.get(0));
-            if(executable == null)
-                throw new RuntimeException("Failed to find the executable '" + exp.callString.get(0) + "'");
-
-            exp.callString.set(0, URLDecoder.decode(executable.getAbsolutePath()));
-
-            ProcessBuilder pb = new ProcessBuilder(exp.callString);
-            pb.directory(experiment.getParentFile());
-            pb.redirectErrorStream(true);
-
-            java.util.Map<String, String> env = pb.environment();
-            if(exp.envVariables != null)
-            {
-                for(String s: exp.envVariables)
-                {
-                    log.debug(s);
-                    String[] var = s.split("=", 2);
-                    env.put(var[0], var[1]);
-                }
-            }
-            //Set the experiment seed variable
-            env.put("AUTOWEKA_EXPERIMENT_SEED", seed);
+            
             Util.makePath(experiment.getParentFile() + File.separator + "out" + File.separator + "logs");
             Util.makePath(experiment.getParentFile() + File.separator + "out" + File.separator + "runstamps");
 
@@ -261,51 +247,84 @@ public class Experiment extends XmlSerializable
             stampFile.createNewFile();
             stampFile.deleteOnExit();
 
-            Process proc = pb.start();
-            
-            //Register a shutdown hook
-            Runtime.getRuntime().addShutdownHook(new Util.ProcessKillerShutdownHook(proc));
+            // remove smac configuration path
+            exp.callString.remove(0);
+            SMACExecutor.main(exp.callString.toArray(new String[0]));
 
-            String line;
-            BufferedReader reader = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-            BufferedWriter logOutput = new BufferedWriter(new FileWriter(experiment.getParentFile() + File.separator + "out" + File.separator + "logs" + File.separator + seed + ".log"));
+            //See if we can get the path
+//            File executable = autoweka.Util.findExecutableOnPath(exp.callString.get(0));
+//            if(executable == null)
+//                throw new RuntimeException("Failed to find the executable '" + exp.callString.get(0) + "'");
+//
+//            exp.callString.set(0, URLDecoder.decode(executable.getAbsolutePath()));
 
-            while ((line = reader.readLine ()) != null) {
-                // fix nested logging...
-                if(line.matches(".*Result for ParamILS:.*")) {
-                    log.debug(line);
-                } else if(line.matches(".*autoweka.smac.SMACWrapper.*")) {
-                    log.debug(line);
-                } else if(line.matches(".*Sample call for new incumbent.*")) {
-                    log.debug(line);
-                } else if(line.matches(".*DEBUG.*")) {
-                    log.debug(line);
-                } else if(line.matches(".*INFO.*")) {
-                    log.info(line);
-                } else if(line.matches(".*WARN.*")) {
-                    log.warn(line);
-                } else if(line.matches(".*ERROR.*")) {
-                    log.error(line);
-                } else if(line.matches(".*Estimated mean quality of final incumbent config.*")) {
-                    System.out.println(line);
-                } else {
-                    log.info(line);
-                }
-                logOutput.write(line + "\n");
-                logOutput.flush();
-            }
+//            ProcessBuilder pb = new ProcessBuilder(exp.callString);
+//            pb.directory(experiment.getParentFile());
+//            pb.redirectErrorStream(true);
+//
+//            java.util.Map<String, String> env = pb.environment();
+//            if(exp.envVariables != null)
+//            {
+//                for(String s: exp.envVariables)
+//                {
+//                    log.debug(s);
+//                    String[] var = s.split("=", 2);
+//                    env.put(var[0], var[1]);
+//                }
+//            }
+//            //Set the experiment seed variable
+//            env.put("AUTOWEKA_EXPERIMENT_SEED", seed);
+//
+//            log.warn("Execute from experiement : "+ Arrays.toString(pb.command().toArray()));
+//            
+//            Process proc = pb.start();
+//            
+//            //Register a shutdown hook
+//            Runtime.getRuntime().addShutdownHook(new Util.ProcessKillerShutdownHook(proc));
+//
+//            String line;
+//            BufferedReader reader = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+//            BufferedWriter logOutput = new BufferedWriter(new FileWriter(experiment.getParentFile() + File.separator + "out" + File.separator + "logs" + File.separator + seed + ".log"));
+//
+//            while ((line = reader.readLine ()) != null) {
+//                // fix nested logging...
+//                if(line.matches(".*Result for ParamILS:.*")) {
+//                    log.debug(line);
+//                } else if(line.matches(".*autoweka.smac.SMACWrapper.*")) {
+//                    log.debug(line);
+//                } else if(line.matches(".*Sample call for new incumbent.*")) {
+//                    log.debug(line);
+//                } else if(line.matches(".*DEBUG.*")) {
+//                    log.debug(line);
+//                } else if(line.matches(".*INFO.*")) {
+//                    log.info(line);
+//                } else if(line.matches(".*WARN.*")) {
+//                    log.warn(line);
+//                } else if(line.matches(".*ERROR.*")) {
+//                    log.error(line);
+//                } else if(line.matches(".*Estimated mean quality of final incumbent config.*")) {
+//                    System.out.println(line);
+//                } else {
+//                    log.info(line);
+//                }
+//                logOutput.write(line + "\n");
+//                logOutput.flush();
+//            }
 
             //And we might as well do the trajectory parse
             TrajectoryParser.main(new String[]{"-single", URLDecoder.decode(expFolder.getAbsolutePath()), seed});
 
-            if(!noExit)
-                System.exit(proc.waitFor());
+//            if(!noExit)
+//                System.exit(proc.waitFor());
+            
         }
         catch(Exception e)
         {
             log.error(e.getMessage(), e);
             System.exit(1);
         }
+        
+        return resultList;
     }
 
     public static Experiment createFromFolder(File folder)

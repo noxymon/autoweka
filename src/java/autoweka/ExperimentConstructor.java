@@ -32,7 +32,7 @@ public abstract class ExperimentConstructor
     /**
      * The directory with all the param files in it.
      */
-    protected String mParamBaseDir = autoweka.Util.getAutoWekaDistributionPath() + File.separator + "params";
+//    protected String mParamBaseDir = autoweka.Util.getAutoWekaDistributionPath() + File.separator + "params";
 
     protected List<ClassParams> mBaseClassParams = new ArrayList<ClassParams>();
     protected List<ClassParams> mMetaClassParams = new ArrayList<ClassParams>();
@@ -158,11 +158,11 @@ public abstract class ExperimentConstructor
         builder.run(exp, new LinkedList<String>(args));
     }
 
-    private void run(Experiment exp, List<String> args)
+    protected void run(Experiment exp, List<String> args)
     {
         //See if we can load up this constructor's canonical class name's props file
         mProperties = new Properties();
-        String propsFilePath = Util.getAutoWekaDistributionPath() + File.separator + this.getClass().getCanonicalName() + ".properties";
+        String propsFilePath = getBaseDir() + File.separator + this.getClass().getCanonicalName() + ".properties";
         try
         {
             mProperties.load(new java.io.FileInputStream(new java.io.File(propsFilePath)));
@@ -312,15 +312,23 @@ public abstract class ExperimentConstructor
         return Collections.emptyList();
     }
 
+    protected String getBaseDir() {
+    	return autoweka.Util.getAutoWekaDistributionPath();
+    }
+    
+    protected String getParamBaseDir() {
+    	return autoweka.Util.getAutoWekaDistributionPath() + File.separator + "params";
+    }
+    
     private void loadAttributeSelectors()
     {
         Instances instances = mInstanceGenerator.getTraining();
 
         //First, process the evaluation methods
-        mAttribEvalClassParams = ApplicabilityTester.getApplicableAttributeEvaluators(instances, mParamBaseDir);
+        mAttribEvalClassParams = ApplicabilityTester.getApplicableAttributeEvaluators(instances, getParamBaseDir());
 
         //Next, grab all the search methods
-        mAttribSearchClassParams = ApplicabilityTester.getApplicableAttributeSearchers(instances, mParamBaseDir);
+        mAttribSearchClassParams = ApplicabilityTester.getApplicableAttributeSearchers(instances, getParamBaseDir());
 
         //if(mAttribEvalClassParams.isEmpty())
             //throw new RuntimeException("Couldn't find any attribute evaluators");
@@ -333,7 +341,7 @@ public abstract class ExperimentConstructor
         if(mAllowedClassifiers.size() > 0)
             allowed = mAllowedClassifiers;
 
-        ApplicabilityTester.ApplicableClassifiers app = ApplicabilityTester.getApplicableClassifiers(instances, mParamBaseDir, allowed);
+        ApplicabilityTester.ApplicableClassifiers app = ApplicabilityTester.getApplicableClassifiers(instances, getParamBaseDir(), allowed);
 
         mBaseClassParams = app.base;
         mMetaClassParams = app.meta;

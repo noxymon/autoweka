@@ -57,7 +57,8 @@ public class SMACExperimentConstructor extends ExperimentConstructor
     {
         // assumes that autoweka.jar is at the root of the autoweka distribution
         // (as it will be for the WEKA package)
-        String prefix = new File(URLDecoder.decode(SMACExperimentConstructor.class.getProtectionDomain().getCodeSource().getLocation().getPath())).getParentFile().toString();
+//        String prefix = new File(URLDecoder.decode(SMACExperimentConstructor.class.getProtectionDomain().getCodeSource().getLocation().getPath())).getParentFile().toString();
+    	String prefix = getBaseDir();
         //Make sure that the properties we have tell us where the executable for smac lives
         if(mProperties.getProperty("smacexecutable") == null)
             throw new RuntimeException("The 'smacexecutable' property was not defined");
@@ -91,7 +92,7 @@ public class SMACExperimentConstructor extends ExperimentConstructor
         args.add("{SEED}");
 
         args.add("--scenarioFile");
-        args.add("autoweka.scenario");
+        args.add(experimentPath+"autoweka.scenario");
         args.add("--logModel");
         args.add("false");
         //args.add("--console-log-level");

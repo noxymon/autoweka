@@ -1,10 +1,11 @@
-package autoweka.smac;
+package autoweka;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import autoweka.Trajectory;
+import autoweka.smac.SMACTrajectoryParser;
 import autoweka.Experiment;
 
 import org.junit.Test;

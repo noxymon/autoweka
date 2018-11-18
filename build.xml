@@ -52,10 +52,10 @@
 
     <!-- Build User guide from Tex sources -->
 	<target name="manual" description="generate user manual">
-        <exec executable="xelatex" dir='${man.dir}'>
+        <exec executable="/Library/TeX/texbin/xelatex" dir='${man.dir}'>
             <arg value="manual.tex"/>
         </exec>
-        <exec executable="xelatex" dir='${man.dir}'>
+        <exec executable="/Library/TeX/texbin/xelatex" dir='${man.dir}'>
             <arg value="manual.tex"/>
         </exec>
     </target>

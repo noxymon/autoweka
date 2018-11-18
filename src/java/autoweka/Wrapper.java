@@ -7,6 +7,7 @@ import java.util.Properties;
 import java.util.ArrayList;
 import java.util.Queue;
 import java.io.FileInputStream;
+import java.lang.management.ManagementFactory;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +40,10 @@ public class Wrapper
      */
     public void run(String[] argsArray)
     {
+    	
+    	String pid = ManagementFactory.getRuntimeMXBean().getName();
+//    	System.out.println("[AutoML] Run subprocess with params "+pid+","+ this.getClass().getName()+","+ Arrays.toString(argsArray));
+    	System.err.println("[AutoML] Run subprocess with params "+pid+","+ this.getClass().getName()+","+ Arrays.toString(argsArray));
         LinkedList<String> args = new LinkedList<String>(Arrays.asList(argsArray));
         ArrayList<String> wrapperConstructorArgs = new ArrayList<String>();
         ArrayList<String> wrapperArgs = new ArrayList<String>();
@@ -156,7 +161,7 @@ public class Wrapper
     protected ClassifierResult _doRun(List<String> runnerArgs)
     {
         //Run it
-
+    	log.warn(" [AutoML] ClassifierResult _doRun stackthread : {}, {}", this.getClass().getName(), Arrays.toString(Thread.currentThread().getStackTrace()));
         ClassifierResult res = new ClassifierResult(mResultMetric);
         res.setCompleted(false);
         com.sun.management.OperatingSystemMXBean OSBean = (com.sun.management.OperatingSystemMXBean) java.lang.management.ManagementFactory.getOperatingSystemMXBean();

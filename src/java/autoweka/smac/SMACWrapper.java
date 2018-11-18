@@ -8,6 +8,7 @@ import java.util.Properties;
 import java.util.Queue;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Collections;
 
@@ -21,6 +22,7 @@ public class SMACWrapper extends Wrapper
 
     public static void main(String[] args)
     {
+    	System.out.println("Start SMAC Wrapper : "+Arrays.toString(args));
         SMACWrapper wrapper = new SMACWrapper();
         try {
             wrapper.run(args);

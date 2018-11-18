@@ -4,7 +4,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import autoweka.instancegenerators.*;
 
-import autoweka.smac.SMACTrajectoryParserTester;
+import autoweka.SMACTrajectoryParserTester;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({

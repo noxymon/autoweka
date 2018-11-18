@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Utility class that just combines running an experiment, extracting a trajectory, then saving the model of the incumbent
  */
-class ExperimentRunner
+public class ExperimentRunner
 {
     final static Logger log = LoggerFactory.getLogger(ExperimentRunner.class);
 
