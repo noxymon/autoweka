@@ -371,9 +371,19 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
                 	args[0] = msExperimentPaths[index] + expName;
                 	args[1] = "" + (seed + index);
                 	
-                	ExperimentRunner.main(args);
+                	List<String> resultList = ExperimentRunner.runMain(args);
                 	
-                	
+                	Pattern p = Pattern.compile(".*Estimated mean quality of final incumbent config .* on test set: (-?[0-9.]+).*");
+                	Pattern pint = Pattern.compile(".*mean quality of.*: (-?[0-9E.]+);.*");
+                	for(String line : resultList) {
+                      Matcher m = p.matcher(line);
+                      if(m.matches()) {
+                          estimatedMetricValues[index] = Double.parseDouble(m.group(1));
+                          if(Arrays.asList(metricsToMax).contains(metric)) {
+                              estimatedMetricValues[index] *= -1;
+                          }
+                      }
+                	}
                 	
 //                	ExperimentRunner
 //                    Process mProc = null;

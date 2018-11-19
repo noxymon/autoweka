@@ -247,69 +247,84 @@ public class Experiment extends XmlSerializable
             stampFile.createNewFile();
             stampFile.deleteOnExit();
 
+            /*
+             * 
+             *  Section for run in the same JVM
+             */
             // remove smac configuration path
-            exp.callString.remove(0);
-            SMACExecutor.main(exp.callString.toArray(new String[0]));
-
+//            exp.callString.remove(0);
+//            
+//            
+//            int returnValue = SMACExecutor.oldMain(exp.callString.toArray(new String[0]));
+//    		
+//    		if(log != null)
+//    		{
+//    			log.debug("Returning with value: {}",returnValue);
+//    		}
+            
+            /*
+             * Section for actually run as sub process
+             */
             //See if we can get the path
-//            File executable = autoweka.Util.findExecutableOnPath(exp.callString.get(0));
-//            if(executable == null)
-//                throw new RuntimeException("Failed to find the executable '" + exp.callString.get(0) + "'");
-//
-//            exp.callString.set(0, URLDecoder.decode(executable.getAbsolutePath()));
+            File executable = autoweka.Util.findExecutableOnPath(exp.callString.get(0));
+            if(executable == null)
+                throw new RuntimeException("Failed to find the executable '" + exp.callString.get(0) + "'");
 
-//            ProcessBuilder pb = new ProcessBuilder(exp.callString);
-//            pb.directory(experiment.getParentFile());
-//            pb.redirectErrorStream(true);
-//
-//            java.util.Map<String, String> env = pb.environment();
-//            if(exp.envVariables != null)
-//            {
-//                for(String s: exp.envVariables)
-//                {
-//                    log.debug(s);
-//                    String[] var = s.split("=", 2);
-//                    env.put(var[0], var[1]);
-//                }
-//            }
-//            //Set the experiment seed variable
-//            env.put("AUTOWEKA_EXPERIMENT_SEED", seed);
-//
-//            log.warn("Execute from experiement : "+ Arrays.toString(pb.command().toArray()));
-//            
-//            Process proc = pb.start();
-//            
-//            //Register a shutdown hook
-//            Runtime.getRuntime().addShutdownHook(new Util.ProcessKillerShutdownHook(proc));
-//
-//            String line;
-//            BufferedReader reader = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-//            BufferedWriter logOutput = new BufferedWriter(new FileWriter(experiment.getParentFile() + File.separator + "out" + File.separator + "logs" + File.separator + seed + ".log"));
-//
-//            while ((line = reader.readLine ()) != null) {
-//                // fix nested logging...
-//                if(line.matches(".*Result for ParamILS:.*")) {
-//                    log.debug(line);
-//                } else if(line.matches(".*autoweka.smac.SMACWrapper.*")) {
-//                    log.debug(line);
-//                } else if(line.matches(".*Sample call for new incumbent.*")) {
-//                    log.debug(line);
-//                } else if(line.matches(".*DEBUG.*")) {
-//                    log.debug(line);
-//                } else if(line.matches(".*INFO.*")) {
-//                    log.info(line);
-//                } else if(line.matches(".*WARN.*")) {
-//                    log.warn(line);
-//                } else if(line.matches(".*ERROR.*")) {
-//                    log.error(line);
-//                } else if(line.matches(".*Estimated mean quality of final incumbent config.*")) {
-//                    System.out.println(line);
-//                } else {
-//                    log.info(line);
-//                }
-//                logOutput.write(line + "\n");
-//                logOutput.flush();
-//            }
+            exp.callString.set(0, URLDecoder.decode(executable.getAbsolutePath()));
+
+            ProcessBuilder pb = new ProcessBuilder(exp.callString);
+            pb.directory(experiment.getParentFile());
+            pb.redirectErrorStream(true);
+
+            java.util.Map<String, String> env = pb.environment();
+            if(exp.envVariables != null)
+            {
+                for(String s: exp.envVariables)
+                {
+                    log.debug(s);
+                    String[] var = s.split("=", 2);
+                    env.put(var[0], var[1]);
+                }
+            }
+            //Set the experiment seed variable
+            env.put("AUTOWEKA_EXPERIMENT_SEED", seed);
+
+            log.warn("Execute from experiement : "+ Arrays.toString(pb.command().toArray()));
+            
+            Process proc = pb.start();
+            
+            //Register a shutdown hook
+            Runtime.getRuntime().addShutdownHook(new Util.ProcessKillerShutdownHook(proc));
+
+            String line;
+            BufferedReader reader = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+            BufferedWriter logOutput = new BufferedWriter(new FileWriter(experiment.getParentFile() + File.separator + "out" + File.separator + "logs" + File.separator + seed + ".log"));
+            
+            while ((line = reader.readLine ()) != null) {
+                // fix nested logging...
+                if(line.matches(".*Result for ParamILS:.*")) {
+                    log.debug(line);
+                } else if(line.matches(".*autoweka.smac.SMACWrapper.*")) {
+                    log.debug(line);
+                } else if(line.matches(".*Sample call for new incumbent.*")) {
+                    log.debug(line);
+                } else if(line.matches(".*DEBUG.*")) {
+                    log.debug(line);
+                } else if(line.matches(".*INFO.*")) {
+                    log.info(line);
+                } else if(line.matches(".*WARN.*")) {
+                    log.warn(line);
+                } else if(line.matches(".*ERROR.*")) {
+                    log.error(line);
+                } else if(line.matches(".*Estimated mean quality of final incumbent config.*")) {
+                    System.out.println(line);
+                } else {
+                    log.info(line);
+                }
+                resultList.add(line);
+                logOutput.write(line + "\n");
+                logOutput.flush();
+            }
 
             //And we might as well do the trajectory parse
             TrajectoryParser.main(new String[]{"-single", URLDecoder.decode(expFolder.getAbsolutePath()), seed});

@@ -171,6 +171,9 @@ public class SMACExperimentConstructor extends ExperimentConstructor
             args.add(props.getProperty("executionMode"));
         }
 
+        args.add("--outputDirectory");
+        args.add(experimentPath+File.separator+"out"+File.separator);
+        
         return args;
     }
 

@@ -2,6 +2,7 @@ package autoweka.tools;
 
 import java.io.File;
 import java.net.URLDecoder;
+import java.util.List;
 
 import autoweka.Experiment;
 import autoweka.TrajectoryParser;
@@ -19,6 +20,9 @@ public class ExperimentRunner
 
     public static void main(String[] args)
     {
+    }
+    
+    public static List<String> runMain(String args[]){
         if(args.length != 2){
             log.error("ExperimentRunner requires 2 arguments - the experiment folder and the seed");
             System.exit(1);
@@ -48,7 +52,7 @@ public class ExperimentRunner
 
         //Run the experiment
         String[] expArgs = new String[]{"-noexit", expFolder, seed};
-        Experiment.main(expArgs);
+        List<String> resultList = Experiment.runMain(expArgs);
 
         //Extract the trajectory
         String[] trajParseArgs = new String[]{"-single", expFolder, seed};
@@ -57,5 +61,7 @@ public class ExperimentRunner
         //And get some predictions/train the model
         String[] runnerArgs = new String[]{expFolder + File.separator + expName + ".trajectories." + seed, "-savemodel"};
         TrajectoryPointPredictionRunner.main(runnerArgs);
+        
+        return resultList;
     }
 };
