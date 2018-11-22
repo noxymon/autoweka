@@ -56,16 +56,20 @@ public class GetBestFromTrajectoryGroup
         Trajectory bestTraj = new Trajectory("");
 
         for(Trajectory traj : trajGroup.getTrajectories()){
-            Trajectory.Point pt = traj.getLastPoint();
-            if(pt == null)
-                continue;
-
-            if(bestPt.mErrorEstimate > pt.mErrorEstimate){
-                bestPt = pt;
-                bestTraj = traj;
-                seed = traj.getSeed();
-                errorEstimate = (float)bestPt.mErrorEstimate; 
-            }
+        	
+//        	Trajectory.Point pt = traj.getLastPoint();
+        	
+        	if(traj.getPoints().isEmpty())
+        		continue;
+        	for(Trajectory.Point pt : traj.getPoints()) {
+        		if(bestPt.mErrorEstimate > pt.mErrorEstimate){
+                    bestPt = pt;
+                    bestTraj = traj;
+                    seed = traj.getSeed();
+                    errorEstimate = (float)bestPt.mErrorEstimate; 
+                }
+        	}
+            
         }
         rawArgs = bestPt.mArgs;
 

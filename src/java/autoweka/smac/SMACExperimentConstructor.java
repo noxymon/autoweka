@@ -117,6 +117,9 @@ public class SMACExperimentConstructor extends ExperimentConstructor
         args.add("--kill-run-exceeding-captime-factor");
         args.add("2.0");
 
+        args.add("--cli-cores");
+        args.add("4");
+        
         if(props.containsKey("deterministicInstanceOrdering"))
         {
             //throw new RuntimeException("This option only works on a hacked up version of SMAC");
