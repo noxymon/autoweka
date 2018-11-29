@@ -7,3 +7,10 @@ doc/manual/manual.log
 doc/manual/manual.out
 doc/manual/manual.pdf
 doc/manual/manual.toc
+
+.DS_Store
+.classpath
+.idea/
+.project
+out/
+autoweka/
