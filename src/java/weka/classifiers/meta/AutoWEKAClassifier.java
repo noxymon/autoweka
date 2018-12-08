@@ -1157,5 +1157,17 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
             throw new IllegalArgumentException(additionalMeasureName
                     + " not supported (Auto-WEKA)");
         }
-  }
+    }
+    
+    public Classifier getResultClassifier() {
+    	return classifier;
+    }
+    
+    public String[] getResultClassifierAttributes() {
+    	return classifierArgs.clone();
+    }
+    
+    public Evaluation getEvaluation() {
+    	return eval;
+    }
 }

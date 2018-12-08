@@ -9,6 +9,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.net.URLDecoder;
 import java.nio.channels.FileChannel;
 import java.util.Arrays;
@@ -189,7 +191,22 @@ public class Util
 
     static public String getAbsoluteClasspath()
     {
-        return System.getProperty("java.class.path") + java.io.File.pathSeparatorChar + URLDecoder.decode(Util.class.getProtectionDomain().getCodeSource().getLocation().getPath());
+//        return System.getProperty("java.class.path") + java.io.File.pathSeparatorChar + URLDecoder.decode(Util.class.getProtectionDomain().getCodeSource().getLocation().getPath());
+        
+    	 ClassLoader cl = ClassLoader.getSystemClassLoader();
+
+         URL[] urls = ((URLClassLoader)cl).getURLs();
+
+         StringBuilder classpath = new StringBuilder();
+         for(URL url: urls){
+        	classpath.append(url.getFile()).append(":");
+         }
+         
+         if(classpath.length() > 0) {
+        	 classpath.deleteCharAt(classpath.length()-1);
+         }
+         
+         return classpath.toString();
     }
 
     /**

@@ -252,7 +252,7 @@ public class Experiment extends XmlSerializable
              *  Section for run in the same JVM
              */
             // remove smac configuration path
-            exp.callString.remove(0);
+//            exp.callString.remove(0);
             
             
             int returnValue = SMACExecutor.oldMain(exp.callString.toArray(new String[0]));

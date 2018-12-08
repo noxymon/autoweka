@@ -161,20 +161,20 @@ public abstract class ExperimentConstructor
     protected void run(Experiment exp, List<String> args)
     {
         //See if we can load up this constructor's canonical class name's props file
-        mProperties = new Properties();
-        String propsFilePath = getBaseDir() + File.separator + this.getClass().getCanonicalName() + ".properties";
-        try
-        {
-            mProperties.load(new java.io.FileInputStream(new java.io.File(propsFilePath)));
-        }
-        catch(java.io.FileNotFoundException e)
-        {
-            log.warn("No property file {}.properties found", propsFilePath);
-        }
-        catch(java.io.IOException e)
-        {
-            log.error(e.getMessage(), e);
-        }
+//        mProperties = new Properties();
+//        String propsFilePath = getBaseDir() + File.separator + this.getClass().getCanonicalName() + ".properties";
+//        try
+//        {
+//            mProperties.load(new java.io.FileInputStream(new java.io.File(propsFilePath)));
+//        }
+//        catch(java.io.FileNotFoundException e)
+//        {
+//            log.warn("No property file {}.properties found", propsFilePath);
+//        }
+//        catch(java.io.IOException e)
+//        {
+//            log.error(e.getMessage(), e);
+//        }
 
         if(exp.resultMetric == null){
             throw new RuntimeException("No Result Metric defined");
@@ -191,8 +191,8 @@ public abstract class ExperimentConstructor
                 mIncludeEnsemble = false;
             else if (arg.equals("-experimentpath"))
                 mExperimentPath = argQueue.poll();
-            else if (arg.equals("-propertyoverride"))
-                Util.parsePropertyString(mProperties, argQueue.poll());
+//            else if (arg.equals("-propertyoverride"))
+//                Util.parsePropertyString(mProperties, argQueue.poll());
             else
                 processArg(arg, argQueue);
         }

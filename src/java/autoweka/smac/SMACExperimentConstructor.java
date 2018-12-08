@@ -60,8 +60,8 @@ public class SMACExperimentConstructor extends ExperimentConstructor
 //        String prefix = new File(URLDecoder.decode(SMACExperimentConstructor.class.getProtectionDomain().getCodeSource().getLocation().getPath())).getParentFile().toString();
     	String prefix = getBaseDir();
         //Make sure that the properties we have tell us where the executable for smac lives
-        if(mProperties.getProperty("smacexecutable") == null)
-            throw new RuntimeException("The 'smacexecutable' property was not defined");
+//        if(mProperties.getProperty("smacexecutable") == null)
+//            throw new RuntimeException("The 'smacexecutable' property was not defined");
 
         Properties props = autoweka.Util.parsePropertyString(mExperiment.extraPropsString);
 
@@ -70,18 +70,18 @@ public class SMACExperimentConstructor extends ExperimentConstructor
             execExtension = ".bat";
         }
 
-        String smac = prefix + File.separator + mProperties.getProperty("smacexecutable") + execExtension;
-
-        File f = new File(Util.expandPath(smac));
-        if(!f.exists())
-            throw new RuntimeException("Could not find SMAC executable '" + f.getAbsoluteFile() + "'");
+//        String smac = prefix + File.separator + mProperties.getProperty("smacexecutable") + execExtension;
+//
+//        File f = new File(Util.expandPath(smac));
+//        if(!f.exists())
+//            throw new RuntimeException("Could not find SMAC executable '" + f.getAbsoluteFile() + "'");
 
         // now make it executable, it's not when extracted by the WEKA package
         // manager...
-        f.setExecutable(true);
+//        f.setExecutable(true);
 
         List<String> args = new ArrayList<String>();
-        args.add(smac);
+//        args.add(smac);
 
         // seeds
         args.add("--seed");
@@ -259,8 +259,8 @@ public class SMACExperimentConstructor extends ExperimentConstructor
         out.println("paramfile = autoweka.params");
         out.println("instance_file = autoweka.instances");
         out.println("test_instance_file = autoweka.test.instances");
-        if(!mInstanceGenerator.getAllInstanceFeatures(mExperiment.instanceGeneratorArgs).isEmpty() && mProperties.get("instancesOverride") != null)
-            out.println("feature_file = autoweka.features");
+//        if(!mInstanceGenerator.getAllInstanceFeatures(mExperiment.instanceGeneratorArgs).isEmpty() && mProperties.get("instancesOverride") != null)
+//            out.println("feature_file = autoweka.features");
     }
 
     public void printParamFile(PrintStream out)
