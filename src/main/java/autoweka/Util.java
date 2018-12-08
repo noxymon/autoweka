@@ -193,20 +193,31 @@ public class Util
     {
 //        return System.getProperty("java.class.path") + java.io.File.pathSeparatorChar + URLDecoder.decode(Util.class.getProtectionDomain().getCodeSource().getLocation().getPath());
         
-    	 ClassLoader cl = ClassLoader.getSystemClassLoader();
+		String path = System.getProperty("java.class.path");
+		
+		String path2 = URLDecoder.decode(Util.class.getProtectionDomain().getCodeSource().getLocation().getPath());
+		
+		if(path2.endsWith(".jar")) {
+			path2 = path2.substring(0, path2.lastIndexOf(File.separator)+1)+'*';
+		}
+    	
+		String loggerPath = Logger.class.getProtectionDomain().getCodeSource().getLocation().getPath();
 
-         URL[] urls = ((URLClassLoader)cl).getURLs();
+		
+    	ClassLoader cl = ClassLoader.getSystemClassLoader();
 
-         StringBuilder classpath = new StringBuilder();
-         for(URL url: urls){
-        	classpath.append(url.getFile()).append(":");
-         }
+        URL[] urls = ((URLClassLoader)cl).getURLs();
+
+        StringBuilder classpath = new StringBuilder();
+        for(URL url: urls){
+        	classpath.append(url.getFile()).append(java.io.File.pathSeparatorChar);
+        }
          
-         if(classpath.length() > 0) {
+        if(classpath.length() > 0) {
         	 classpath.deleteCharAt(classpath.length()-1);
-         }
+        }
          
-         return classpath.toString();
+        return classpath.toString()+File.pathSeparatorChar+path+File.pathSeparatorChar+path2 + File.pathSeparatorChar + loggerPath;
     }
 
     /**
