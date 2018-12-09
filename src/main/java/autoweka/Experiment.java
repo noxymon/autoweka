@@ -336,7 +336,7 @@ public class Experiment extends XmlSerializable
         catch(Exception e)
         {
             log.error(e.getMessage(), e);
-            System.exit(1);
+//            System.exit(1);
         }
         
         return resultList;

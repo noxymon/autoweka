@@ -330,10 +330,10 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
             exp.instanceGeneratorArgs = "seed=" + (seed + 1) + ":" + resamplingArgs + ":seed=" + (seed + i);
             exp.attributeSelection = true;
 
-            exp.attributeSelectionTimeout = timeLimit * 1;
+            exp.attributeSelectionTimeout = Math.max(timeLimit/60, 1);
             exp.tunerTimeout = wallClockLimit;
 //            exp.tunerTimeout = timeLimit * 1;
-            exp.trainTimeout = timeLimit * 5;
+            exp.trainTimeout = Math.max(timeLimit/60, 1)*5;
 
             exp.memory = memLimit + "m";
             exp.extraPropsString = extraArgs;
@@ -614,7 +614,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
                 "seed", 1, "-seed <seed>"));
         result.addElement(
             new Option("\tThe time limit for tuning in minutes (approximately).\n" + "\t(default: " + DEFAULT_TIME_LIMIT + ")",
-                "timeLimit", 1, "-timeLimit <limit>"));
+                "timeLimit", 60, "-timeLimit <limit>"));
         result.addElement(
             new Option("\tThe memory limit for runs in MiB.\n" + "\t(default: " + DEFAULT_MEM_LIMIT + ")",
                 "memLimit", 1, "-memLimit <limit>"));
@@ -704,7 +704,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         	wallClockLimit = Integer.parseInt(tmpStr);
         } else {
 //        	wallClockLimit = DEFAULT_TIME_LIMIT;
-        	wallClockLimit = timeLimit*50;
+        	wallClockLimit = (int)(timeLimit);
         }
         
         tmpStr = Utils.getOption("memLimit", options);

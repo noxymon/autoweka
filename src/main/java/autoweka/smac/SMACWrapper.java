@@ -27,7 +27,7 @@ public class SMACWrapper extends Wrapper
         try {
             wrapper.run(args);
         } catch(Exception e) {
-            System.exit(1);
+//            System.exit(1);
         }
     }
 
@@ -99,6 +99,6 @@ public class SMACWrapper extends Wrapper
 
         //Print the result string
         System.out.println("Result for ParamILS: " + resultStr + ", " + res.getTime() + ", 0, " + score + ", " + mExperimentSeed + ", EXTRA " + extraResultsSB.toString());
-        System.exit(0);
+//        System.exit(0);
     }
 }

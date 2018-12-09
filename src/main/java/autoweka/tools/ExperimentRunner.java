@@ -2,6 +2,7 @@ package autoweka.tools;
 
 import java.io.File;
 import java.net.URLDecoder;
+import java.util.ArrayList;
 import java.util.List;
 
 import autoweka.Experiment;
@@ -25,14 +26,16 @@ public class ExperimentRunner
     public static List<String> runMain(String args[]){
         if(args.length != 2){
             log.error("ExperimentRunner requires 2 arguments - the experiment folder and the seed");
-            System.exit(1);
+//            System.exit(1);
+            return new ArrayList<String>();
         }
         File expFolderFile = new File(args[0]);
         String seed = args[1];
 
         if(!expFolderFile.exists() || !expFolderFile.isDirectory()){
             log.error("The first argument does not appear to be an experiment folder");
-            System.exit(1);
+//            System.exit(1);
+            return new ArrayList<String>();
         }
         String expFolder = URLDecoder.decode(expFolderFile.getAbsolutePath());
         String expName = expFolderFile.getName();

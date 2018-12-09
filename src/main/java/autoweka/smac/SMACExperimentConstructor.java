@@ -117,11 +117,13 @@ public class SMACExperimentConstructor extends ExperimentConstructor
         args.add("--kill-run-exceeding-captime-factor");
         args.add("2.0");
 
+        int coreNo = (Runtime.getRuntime().availableProcessors() + 1)/2;
+        
         args.add("--cli-cores");
-        args.add("4");
+        args.add(coreNo+"");
         
         args.add("--validation-cores");
-        args.add("4");
+        args.add(coreNo+"");
         
         if(props.containsKey("deterministicInstanceOrdering"))
         {

@@ -125,7 +125,8 @@ class ListExperimentBatch extends XmlSerializable
         {
             log.error("Useage: {} <xmlfilename>", ExperimentBatch.class.getCanonicalName());
             log.error("Makes a template experiment batch file");
-            System.exit(1);
+//            System.exit(1);
+            return;
         }
         ListExperimentBatch batch = new ListExperimentBatch();
 

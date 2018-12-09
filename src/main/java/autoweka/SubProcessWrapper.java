@@ -35,9 +35,9 @@ public class SubProcessWrapper extends Wrapper
         try {
             wrapper.run(args);
         } catch(Exception e) {
-            System.exit(1);
+//            System.exit(1);
         }
-        System.exit(0);
+//        System.exit(0);
     }
 
     /**
