@@ -117,7 +117,7 @@ public class SMACExperimentConstructor extends ExperimentConstructor
         args.add("--kill-run-exceeding-captime-factor");
         args.add("2.0");
 
-        int coreNo = (Runtime.getRuntime().availableProcessors() + 1)/2;
+        int coreNo = (Runtime.getRuntime().availableProcessors());
         
         args.add("--cli-cores");
         args.add(coreNo+"");

@@ -385,79 +385,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
                       }
                 	}
                 	
-//                	ExperimentRunner
-//                    Process mProc = null;
-//                    try {
-//                    	
-//                        ProcessBuilder pb = new ProcessBuilder(javaExecutable, "-Xmx128m", "-cp", autoweka.Util.getAbsoluteClasspath(), "autoweka.tools.ExperimentRunner", msExperimentPaths[index] + expName, "" + (seed + index));
-//                        pb.redirectErrorStream(true);
-//                        StringBuilder builder = new StringBuilder();
-//
-//                        for(String str : pb.command()) {
-//                        	builder.append(str).append(" ");
-//                        }
-//                        log.info("AutoWeka classification {} : {}",ManagementFactory.getRuntimeMXBean().getName(), Arrays.toString(pb.command().toArray()));
-//                        
-//                        mProc = pb.start();
-//
-//                        Thread killerHook = new autoweka.Util.ProcessKillerShutdownHook(mProc);
-//                        Runtime.getRuntime().addShutdownHook(killerHook);
-//
-//                        BufferedReader reader = new BufferedReader(new InputStreamReader(mProc.getInputStream()));
-//                        String line;
-//                        Pattern p = Pattern.compile(".*Estimated mean quality of final incumbent config .* on test set: (-?[0-9.]+).*");
-//                        Pattern pint = Pattern.compile(".*mean quality of.*: (-?[0-9E.]+);.*");
-//                        int tried = 0;
-//                        double bestMetricValue = -1;
-//                        while((line = reader.readLine()) != null) {
-//                            Matcher m = p.matcher(line);
-//                            if(m.matches()) {
-//                                estimatedMetricValues[index] = Double.parseDouble(m.group(1));
-//                                if(Arrays.asList(metricsToMax).contains(metric)) {
-//                                    estimatedMetricValues[index] *= -1;
-//                                }
-//                            }
-//                            m = pint.matcher(line);
-//                            if(m.matches()) {
-//                                bestMetricValue = Double.parseDouble(m.group(1));
-//                                if(Arrays.asList(metricsToMax).contains(metric)) {
-//                                    bestMetricValue *= -1;
-//                                }
-//                            }
-//                            // fix nested logging...
-//                            if(line.matches(".*DEBUG.*") || line.matches(".*Variance is less than.*")) {
-//                                //log.debug(line);
-//                            } else if(line.matches(".*INFO.*")) {
-//                                if(line.matches(".*ClassifierRunner - weka.classifiers.*")) {
-//                                    tried++;
-//                                    totalTried++;
-//                                    if(wLog != null) {
-//                                        String msg = "Thread " + index + ": performed " + tried + " evaluations, estimated " + metric + " " + bestMetricValue + "...";
-//                                        wLog.statusMessage(msg);
-//                                        if(tried % 10 == 0)
-//                                            wLog.logMessage(msg);
-//                                    }
-//                                }
-//                                //log.info(line);
-//                            } else if(line.matches(".*WARN.*")) {
-//                                log.warn(line);
-//                            } else if(line.matches(".*ERROR.*")) {
-//                                log.error(line);
-//                            } else {
-//                                log.info(line);
-//                            }
-//                            
-//                            storeResult(line);
-//                            if(Thread.currentThread().isInterrupted()) {
-//                                mProc.destroy();
-//                                break;
-//                            }
-//                        }
-//                        Runtime.getRuntime().removeShutdownHook(killerHook);
-//                    } catch (Exception e) {
-//                        if(mProc != null) mProc.destroy();
-//                        log.error(e.getMessage(), e);
-//                    }
+
                 } });
             workers[i].start();
         }
@@ -704,7 +632,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         	wallClockLimit = Integer.parseInt(tmpStr);
         } else {
 //        	wallClockLimit = DEFAULT_TIME_LIMIT;
-        	wallClockLimit = (int)(timeLimit);
+        	wallClockLimit = Math.max(1,(int)(timeLimit*5/6));
         }
         
         tmpStr = Utils.getOption("memLimit", options);
