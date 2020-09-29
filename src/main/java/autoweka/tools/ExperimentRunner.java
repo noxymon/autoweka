@@ -2,6 +2,8 @@ package autoweka.tools;
 
 import java.io.File;
 import java.net.URLDecoder;
+import java.util.ArrayList;
+import java.util.List;
 
 import autoweka.Experiment;
 import autoweka.TrajectoryParser;
@@ -13,22 +15,27 @@ import org.slf4j.LoggerFactory;
 /**
  * Utility class that just combines running an experiment, extracting a trajectory, then saving the model of the incumbent
  */
-class ExperimentRunner
+public class ExperimentRunner
 {
     final static Logger log = LoggerFactory.getLogger(ExperimentRunner.class);
 
     public static void main(String[] args)
     {
+    }
+    
+    public static List<String> runMain(String args[]){
         if(args.length != 2){
             log.error("ExperimentRunner requires 2 arguments - the experiment folder and the seed");
-            System.exit(1);
+//            System.exit(1);
+            return new ArrayList<String>();
         }
         File expFolderFile = new File(args[0]);
         String seed = args[1];
 
         if(!expFolderFile.exists() || !expFolderFile.isDirectory()){
             log.error("The first argument does not appear to be an experiment folder");
-            System.exit(1);
+//            System.exit(1);
+            return new ArrayList<String>();
         }
         String expFolder = URLDecoder.decode(expFolderFile.getAbsolutePath());
         String expName = expFolderFile.getName();
@@ -48,7 +55,7 @@ class ExperimentRunner
 
         //Run the experiment
         String[] expArgs = new String[]{"-noexit", expFolder, seed};
-        Experiment.main(expArgs);
+        List<String> resultList = Experiment.runMain(expArgs);
 
         //Extract the trajectory
         String[] trajParseArgs = new String[]{"-single", expFolder, seed};
@@ -57,5 +64,7 @@ class ExperimentRunner
         //And get some predictions/train the model
         String[] runnerArgs = new String[]{expFolder + File.separator + expName + ".trajectories." + seed, "-savemodel"};
         TrajectoryPointPredictionRunner.main(runnerArgs);
+        
+        return resultList;
     }
 };

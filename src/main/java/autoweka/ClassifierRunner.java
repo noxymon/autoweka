@@ -81,6 +81,7 @@ public class ClassifierRunner
 
         public RunnerThread(String _instanceStr, String _resultMetric, float _timeout, String _mSeed, List<String> _args)
         {
+        	log.warn("[AutoML] runner thread created : {}", Arrays.toString(Thread.currentThread().getStackTrace()));
             instanceStr = _instanceStr;
             resultMetric = _resultMetric;
             timeout = _timeout;
@@ -144,6 +145,7 @@ public class ClassifierRunner
      */
     private ClassifierResult _run(String instanceStr, String resultMetric, float timeout, String mSeed, List<String> args)
     {
+    	log.warn(" [AutoML] current stackthread : {}, {}", this.getClass().getName(), Arrays.toString(Thread.currentThread().getStackTrace()));
 
         //The first arg contains stuff we need to pass to the instance generator
         Instances training = mInstanceGenerator.getTrainingFromParams(instanceStr);

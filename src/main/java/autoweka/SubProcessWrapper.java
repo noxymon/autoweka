@@ -2,6 +2,7 @@ package autoweka;
 
 import java.io.File;
 import java.io.InputStreamReader;
+import java.lang.management.ManagementFactory;
 import java.io.BufferedReader;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,13 +30,14 @@ public class SubProcessWrapper extends Wrapper
      */
     public static void main(String [] args)
     {
+    	
         SubProcessWrapper wrapper = new SubProcessWrapper();
         try {
             wrapper.run(args);
         } catch(Exception e) {
-            System.exit(1);
+//            System.exit(1);
         }
-        System.exit(0);
+//        System.exit(0);
     }
 
     /**
@@ -188,6 +190,8 @@ public class SubProcessWrapper extends Wrapper
             if(runDir != null)
                 pb.directory(runDir);
             pb.redirectErrorStream(true);
+            log.warn("Execute from sub process wrapper : "+Arrays.toString(pb.command().toArray()));
+            log.warn("Execute from sub process wrapper {} : {}",ManagementFactory.getRuntimeMXBean().getName(),Arrays.toString(Thread.currentThread().getStackTrace()));
             Process proc = pb.start();
             
             //Register a shutdown hook

@@ -44,11 +44,11 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
 import java.io.Serializable;
+import java.lang.management.ManagementFactory;
 import java.io.FileNotFoundException;
-
-
+import java.io.IOException;
 import java.nio.file.Files;
-
+import java.nio.file.Path;
 import java.net.URLDecoder;
 
 import java.util.Arrays;
@@ -77,7 +77,7 @@ import autoweka.Util;
 import autoweka.Trajectory;
 import autoweka.TrajectoryGroup;
 import autoweka.TrajectoryMerger;
-
+import autoweka.tools.ExperimentRunner;
 import autoweka.tools.GetBestFromTrajectoryGroup;
 
 import autoweka.Configuration;
@@ -216,6 +216,8 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
     protected int seed = 123;
     /** The time limit for running Auto-WEKA. */
     protected int timeLimit = DEFAULT_TIME_LIMIT;
+    /** The time limit for running Auto-WEKA. */
+    protected int wallClockLimit = DEFAULT_TIME_LIMIT;
     /** The memory limit for running classifiers. */
     protected int memLimit = DEFAULT_MEM_LIMIT;
 
@@ -287,6 +289,14 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
     }
 
 
+    protected String getTempDirectoryPath() throws IOException {
+    	return Files.createTempDirectory("autoweka").toString() + File.separator;
+    }
+    
+    protected void storeResult(String ling) {
+    	// Do nothing
+    }
+    
     /**
     * Find the best classifier, arguments, and attribute selection for the data.
     *
@@ -301,7 +311,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         msExperimentPaths = new String[parallelRuns];
         for(int i = 0; i < parallelRuns; i++) {
             estimatedMetricValues[i] = -1;
-            msExperimentPaths[i] = Files.createTempDirectory("autoweka").toString() + File.separator;
+            msExperimentPaths[i] = getTempDirectoryPath();
             Experiment exp = new Experiment();
             exp.name = expName;
 
@@ -320,9 +330,10 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
             exp.instanceGeneratorArgs = "seed=" + (seed + 1) + ":" + resamplingArgs + ":seed=" + (seed + i);
             exp.attributeSelection = true;
 
-            exp.attributeSelectionTimeout = timeLimit * 1;
-            exp.tunerTimeout = timeLimit * 50;
-            exp.trainTimeout = timeLimit * 5;
+            exp.attributeSelectionTimeout = Math.max(timeLimit/60, 1);
+            exp.tunerTimeout = wallClockLimit;
+//            exp.tunerTimeout = timeLimit * 1;
+            exp.trainTimeout = Math.max(timeLimit/60, 1)*5;
 
             exp.memory = memLimit + "m";
             exp.extraPropsString = extraArgs;
@@ -333,7 +344,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
             args.add(msExperimentPaths[i]);
             //Make the thing
 
-            ExperimentConstructor.buildSingle("autoweka.smac.SMACExperimentConstructor", exp, args);
+            buildExperimentConstructor(exp, args);
 
             if(nBestConfigs > 1) {
                 String temporaryDirPath = msExperimentPaths[i] + expName + File.separator; //TODO make this a global
@@ -356,69 +367,25 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
             final int index = i;
             workers[i] = new Thread(new Runnable() {
                 public void run() {
-                    Process mProc = null;
-                    try {
-                        ProcessBuilder pb = new ProcessBuilder(javaExecutable, "-Xmx128m", "-cp", autoweka.Util.getAbsoluteClasspath(), "autoweka.tools.ExperimentRunner", msExperimentPaths[index] + expName, "" + (seed + index));
-                        pb.redirectErrorStream(true);
+                	String[] args = new String[2];
+                	args[0] = msExperimentPaths[index] + expName;
+                	args[1] = "" + (seed + index);
+                	
+                	List<String> resultList = ExperimentRunner.runMain(args);
+                	
+                	Pattern p = Pattern.compile(".*Estimated mean quality of final incumbent config .* on test set: (-?[0-9.]+).*");
+                	Pattern pint = Pattern.compile(".*mean quality of.*: (-?[0-9E.]+);.*");
+                	for(String line : resultList) {
+                      Matcher m = p.matcher(line);
+                      if(m.matches()) {
+                          estimatedMetricValues[index] = Double.parseDouble(m.group(1));
+                          if(Arrays.asList(metricsToMax).contains(metric)) {
+                              estimatedMetricValues[index] *= -1;
+                          }
+                      }
+                	}
+                	
 
-                        mProc = pb.start();
-
-                        Thread killerHook = new autoweka.Util.ProcessKillerShutdownHook(mProc);
-                        Runtime.getRuntime().addShutdownHook(killerHook);
-
-                        BufferedReader reader = new BufferedReader(new InputStreamReader(mProc.getInputStream()));
-                        String line;
-                        Pattern p = Pattern.compile(".*Estimated mean quality of final incumbent config .* on test set: (-?[0-9.]+).*");
-                        Pattern pint = Pattern.compile(".*mean quality of.*: (-?[0-9E.]+);.*");
-                        int tried = 0;
-                        double bestMetricValue = -1;
-                        while((line = reader.readLine()) != null) {
-                            Matcher m = p.matcher(line);
-                            if(m.matches()) {
-                                estimatedMetricValues[index] = Double.parseDouble(m.group(1));
-                                if(Arrays.asList(metricsToMax).contains(metric)) {
-                                    estimatedMetricValues[index] *= -1;
-                                }
-                            }
-                            m = pint.matcher(line);
-                            if(m.matches()) {
-                                bestMetricValue = Double.parseDouble(m.group(1));
-                                if(Arrays.asList(metricsToMax).contains(metric)) {
-                                    bestMetricValue *= -1;
-                                }
-                            }
-                            // fix nested logging...
-                            if(line.matches(".*DEBUG.*") || line.matches(".*Variance is less than.*")) {
-                                //log.debug(line);
-                            } else if(line.matches(".*INFO.*")) {
-                                if(line.matches(".*ClassifierRunner - weka.classifiers.*")) {
-                                    tried++;
-                                    totalTried++;
-                                    if(wLog != null) {
-                                        String msg = "Thread " + index + ": performed " + tried + " evaluations, estimated " + metric + " " + bestMetricValue + "...";
-                                        wLog.statusMessage(msg);
-                                        if(tried % 10 == 0)
-                                            wLog.logMessage(msg);
-                                    }
-                                }
-                                //log.info(line);
-                            } else if(line.matches(".*WARN.*")) {
-                                log.warn(line);
-                            } else if(line.matches(".*ERROR.*")) {
-                                log.error(line);
-                            } else {
-                                log.info(line);
-                            }
-                            if(Thread.currentThread().isInterrupted()) {
-                                mProc.destroy();
-                                break;
-                            }
-                        }
-                        Runtime.getRuntime().removeShutdownHook(killerHook);
-                    } catch (Exception e) {
-                        if(mProc != null) mProc.destroy();
-                        log.error(e.getMessage(), e);
-                    }
                 } });
             workers[i].start();
         }
@@ -528,7 +495,11 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         eval.evaluateModel(classifier, is);
     }
 
-    /**
+    protected void buildExperimentConstructor(Experiment exp, List<String> args) {
+    	ExperimentConstructor.buildSingle("autoweka.smac.SMACExperimentConstructor", exp, args);
+	}
+
+	/**
     * Calculates the class membership for the given test instance.
     *
     * @param i the instance to be classified
@@ -571,7 +542,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
                 "seed", 1, "-seed <seed>"));
         result.addElement(
             new Option("\tThe time limit for tuning in minutes (approximately).\n" + "\t(default: " + DEFAULT_TIME_LIMIT + ")",
-                "timeLimit", 1, "-timeLimit <limit>"));
+                "timeLimit", 60, "-timeLimit <limit>"));
         result.addElement(
             new Option("\tThe memory limit for runs in MiB.\n" + "\t(default: " + DEFAULT_MEM_LIMIT + ")",
                 "memLimit", 1, "-memLimit <limit>"));
@@ -656,6 +627,14 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
             timeLimit = DEFAULT_TIME_LIMIT;
         }
 
+        tmpStr = Utils.getOption("wallClockLimit", options);
+        if (tmpStr.length() != 0) {
+        	wallClockLimit = Integer.parseInt(tmpStr);
+        } else {
+//        	wallClockLimit = DEFAULT_TIME_LIMIT;
+        	wallClockLimit = Math.max(1,(int)(timeLimit*5/6));
+        }
+        
         tmpStr = Utils.getOption("memLimit", options);
         if (tmpStr.length() != 0) {
             memLimit = Integer.parseInt(tmpStr);
@@ -1106,5 +1085,17 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
             throw new IllegalArgumentException(additionalMeasureName
                     + " not supported (Auto-WEKA)");
         }
-  }
+    }
+    
+    public Classifier getResultClassifier() {
+    	return classifier;
+    }
+    
+    public String[] getResultClassifierAttributes() {
+    	return classifierArgs.clone();
+    }
+    
+    public Evaluation getEvaluation() {
+    	return eval;
+    }
 }

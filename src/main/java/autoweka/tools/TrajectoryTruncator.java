@@ -15,7 +15,8 @@ class TrajectoryTruncator
         //The first argument is the number of seconds to clip at
         if(args.length < 2){
             log.error("Usage: [time to truncate trajectory at] [trajectory group file] ...");
-            System.exit(1);
+//            System.exit(1);
+            return;
         }
 
         float maxTime = 0;
@@ -24,11 +25,13 @@ class TrajectoryTruncator
             maxTime = Float.parseFloat(args[0]);
         }catch(NumberFormatException e){
             log.error("The first argument does not appear to be a number");
-            System.exit(1);
+//            System.exit(1);
+            return;
         }
         if(maxTime <= 0){
             log.error("The truncation time must be greater than 0");
-            System.exit(1);
+//            System.exit(1);
+            return;
         }
 
         for(int i = 1; i < args.length; i++){

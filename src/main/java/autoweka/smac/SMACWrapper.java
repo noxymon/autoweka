@@ -8,6 +8,7 @@ import java.util.Properties;
 import java.util.Queue;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Collections;
 
@@ -21,11 +22,12 @@ public class SMACWrapper extends Wrapper
 
     public static void main(String[] args)
     {
+    	System.out.println("Start SMAC Wrapper : "+Arrays.toString(args));
         SMACWrapper wrapper = new SMACWrapper();
         try {
             wrapper.run(args);
         } catch(Exception e) {
-            System.exit(1);
+//            System.exit(1);
         }
     }
 
@@ -97,6 +99,6 @@ public class SMACWrapper extends Wrapper
 
         //Print the result string
         System.out.println("Result for ParamILS: " + resultStr + ", " + res.getTime() + ", 0, " + score + ", " + mExperimentSeed + ", EXTRA " + extraResultsSB.toString());
-        System.exit(0);
+//        System.exit(0);
     }
 }

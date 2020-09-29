@@ -9,6 +9,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.net.URLDecoder;
 import java.nio.channels.FileChannel;
 import java.util.Arrays;
@@ -189,7 +191,33 @@ public class Util
 
     static public String getAbsoluteClasspath()
     {
-        return System.getProperty("java.class.path") + java.io.File.pathSeparatorChar + URLDecoder.decode(Util.class.getProtectionDomain().getCodeSource().getLocation().getPath());
+//        return System.getProperty("java.class.path") + java.io.File.pathSeparatorChar + URLDecoder.decode(Util.class.getProtectionDomain().getCodeSource().getLocation().getPath());
+        
+		String path = System.getProperty("java.class.path");
+		
+		String path2 = URLDecoder.decode(Util.class.getProtectionDomain().getCodeSource().getLocation().getPath());
+		
+		if(path2.endsWith(".jar")) {
+			path2 = path2.substring(0, path2.lastIndexOf(File.separator)+1)+'*';
+		}
+    	
+		String loggerPath = Logger.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+
+		
+    	ClassLoader cl = ClassLoader.getSystemClassLoader();
+
+        URL[] urls = ((URLClassLoader)cl).getURLs();
+
+        StringBuilder classpath = new StringBuilder();
+        for(URL url: urls){
+        	classpath.append(url.getFile()).append(java.io.File.pathSeparatorChar);
+        }
+         
+        if(classpath.length() > 0) {
+        	 classpath.deleteCharAt(classpath.length()-1);
+        }
+         
+        return classpath.toString()+File.pathSeparatorChar+path+File.pathSeparatorChar+path2 + File.pathSeparatorChar + loggerPath;
     }
 
     /**
